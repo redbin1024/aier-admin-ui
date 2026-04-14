@@ -10,10 +10,18 @@ export default function setupUserLoginInfoGuard(router: Router) {
     const userStore = useUserStore();
     if (isLogin()) {
       if (userStore.role) {
+        if (to.name === 'login') {
+          next({ name: 'Workplace' });
+          return;
+        }
         next();
       } else {
         try {
           await userStore.info();
+          if (to.name === 'login') {
+            next({ name: 'Workplace' });
+            return;
+          }
           next();
         } catch (error) {
           await userStore.logout();

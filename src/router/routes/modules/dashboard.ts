@@ -25,4 +25,28 @@ const DASHBOARD: AppRouteRecordRaw = {
   ],
 };
 
-export default DASHBOARD;
+const PROFILE: AppRouteRecordRaw = {
+  path: '/user',
+  name: 'User',
+  component: DEFAULT_LAYOUT,
+  meta: {
+    locale: '个人中心',
+    requiresAuth: true,
+    hideInMenu: true,
+  },
+  children: [
+    {
+      path: 'profile',
+      name: 'UserProfile',
+      component: () => import('@/views/system/user/profile/index.vue'),
+      meta: {
+        locale: '个人中心',
+        requiresAuth: true,
+        hideInMenu: true,
+        roles: ['*'],
+      },
+    },
+  ],
+};
+
+export default [DASHBOARD, PROFILE];

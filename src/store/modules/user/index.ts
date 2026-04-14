@@ -4,8 +4,8 @@ import {
   logout as userLogout,
   getUserInfo,
   LoginData,
-} from '@/api/user';
-import { setToken, clearToken } from '@/utils/auth';
+} from '@/api/login';
+import { setToken, clearToken, clearDynamicTenant } from '@/utils/auth';
 import { removeRouteListener } from '@/utils/route-listener';
 import { UserState } from './types';
 import useAppStore from '../app';
@@ -55,16 +55,42 @@ const useUserStore = defineStore('user', {
 
     // Get user's information
     async info() {
-      const res = await getUserInfo();
+      const res: any = await getUserInfo();
 
-      this.setInfo(res.data);
+      let userInfo = res.data;
+      // 兼容 RuoYi 返回格式
+      if (res.user || res.roles) {
+        userInfo = {
+          ...res.user,
+          name: res.user?.userName || res.user?.nickName,
+          avatar: res.user?.avatar,
+          role: res.roles && res.roles.length > 0 ? res.roles[0] : 'user',
+        };
+      } else if (res.data && (res.data.user || res.data.roles)) {
+        userInfo = {
+          ...res.data.user,
+          name: res.data.user?.userName || res.data.user?.nickName,
+          avatar: res.data.user?.avatar,
+          role:
+            res.data.roles && res.data.roles.length > 0
+              ? res.data.roles[0]
+              : 'user',
+        };
+      }
+
+      this.setInfo(userInfo);
     },
 
     // Login
     async login(loginForm: LoginData) {
       try {
         const res = await userLogin(loginForm);
-        setToken(res.data.token);
+        // 兼容后端返回 access_token 或 token
+        const token = res.data.access_token || res.data.token;
+        if (!token) {
+          throw new Error('登录失败：未获取到 token');
+        }
+        setToken(token);
       } catch (err) {
         clearToken();
         throw err;
@@ -74,6 +100,7 @@ const useUserStore = defineStore('user', {
       const appStore = useAppStore();
       this.resetInfo();
       clearToken();
+      clearDynamicTenant();
       removeRouteListener();
       appStore.clearServerMenu();
     },

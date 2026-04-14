@@ -1,5 +1,4 @@
 import { App, ComponentPublicInstance } from 'vue';
-import axios from 'axios';
 
 export default function handleError(Vue: App, baseUrl: string) {
   if (!baseUrl) {
@@ -11,18 +10,15 @@ export default function handleError(Vue: App, baseUrl: string) {
     info: string
   ) => {
     // send error info
-    axios.post(`${baseUrl}/report-error`, {
-      err,
-      instance,
-      info,
-      // location: window.location.href,
-      // message: err.message,
-      // stack: err.stack,
-      // browserInfo: getBrowserInfo(),
-      // user info
-      // dom info
-      // url info
-      // ...
-    });
+    fetch(`${baseUrl}/report-error`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        err: err instanceof Error ? err.message : String(err),
+        info,
+      }),
+    }).catch(console.error);
   };
 }

@@ -33,6 +33,9 @@ module.exports = {
       typescript: {
         project: path.resolve(__dirname, './tsconfig.json'),
       },
+      node: {
+        extensions: ['.js', '.jsx', '.ts', '.tsx', '.vue', '.json'],
+      },
     },
   },
   rules: {
@@ -60,6 +63,7 @@ module.exports = {
         jsx: 'never',
         ts: 'never',
         tsx: 'never',
+        vue: 'always',
       },
     ],
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0,

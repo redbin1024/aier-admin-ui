@@ -94,16 +94,37 @@
           if (_route) {
             _route.forEach((element) => {
               // This is demo, modify nodes as needed
-              const icon = element?.meta?.icon
-                ? () => h(compile(`<${element?.meta?.icon}/>`))
-                : null;
+              // 安全渲染图标：仅对合法的 Arco icon 名进行 compile
+              const iconName = element?.meta?.icon;
+              let icon = null;
+              if (iconName && /^[a-zA-Z][a-zA-Z0-9-]*$/.test(iconName)) {
+                try {
+                  const compiled = compile(
+                    `<icon-${iconName.replace('icon-', '')}/>`
+                  );
+                  icon = () => h(compiled);
+                } catch (e) {
+                  // icon 编译失败，静默跳过
+                  icon = null;
+                }
+              }
+
+              // Only use t() if the string starts with 'menu.'
+              const getLocaleStr = (locale?: string) => {
+                if (!locale) return '';
+                return locale.startsWith('menu.') ? t(locale) : locale;
+              };
+
+              const titleNode = () =>
+                h('span', getLocaleStr(element?.meta?.locale as string));
+
               const node =
                 element?.children && element?.children.length !== 0 ? (
                   <a-sub-menu
                     key={element?.name}
                     v-slots={{
                       icon,
-                      title: () => h(compile(t(element?.meta?.locale || ''))),
+                      title: titleNode,
                     }}
                   >
                     {travel(element?.children)}
@@ -114,7 +135,7 @@
                     v-slots={{ icon }}
                     onClick={() => goto(element)}
                   >
-                    {t(element?.meta?.locale || '')}
+                    {titleNode()}
                   </a-menu-item>
                 );
               nodes.push(node as never);

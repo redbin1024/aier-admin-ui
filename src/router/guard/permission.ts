@@ -18,13 +18,43 @@ export default function setupPermissionGuard(router: Router) {
 
       // 根据需要自行完善来源于服务端的菜单配置的permission逻辑
       // Refine the permission logic from the server's menu configuration as needed
+      let isFetched = false;
       if (
         !appStore.appAsyncMenus.length &&
         !WHITE_LIST.find((el) => el.name === to.name)
       ) {
-        await appStore.fetchServerMenuConfig();
+        try {
+          const asyncRoutes = (await appStore.fetchServerMenuConfig()) || [];
+          asyncRoutes.forEach((route: RouteRecordNormalized) => {
+            try {
+              if (route.name && !router.hasRoute(route.name)) {
+                router.addRoute(route);
+              }
+            } catch (e) {
+              // eslint-disable-next-line no-console
+              console.warn(`[Router] 注册路由失败: ${String(route.name)}`, e);
+            }
+          });
+          isFetched = true;
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error('[Router] 获取或注册菜单路由失败:', error);
+          next(NOT_FOUND);
+          return;
+        }
       }
-      const serverMenuConfig = [...appStore.appAsyncMenus, ...WHITE_LIST];
+
+      if (isFetched) {
+        next({ path: to.fullPath, replace: true, query: to.query });
+        return;
+      }
+
+      // 将本地静态路由和服务端菜单合并检查
+      const serverMenuConfig = [
+        ...appRoutes,
+        ...appStore.appAsyncMenus,
+        ...WHITE_LIST,
+      ] as unknown as RouteRecordNormalized[];
 
       let exist = false;
       while (serverMenuConfig.length && !exist) {
@@ -37,6 +67,7 @@ export default function setupPermissionGuard(router: Router) {
           );
         }
       }
+      // If to.name is notFound, it means the route doesn't exist even after fetching.
       if (exist && permissionsAllow) {
         next();
       } else next(NOT_FOUND);

@@ -10,7 +10,8 @@ export default function useMenuTree() {
   const appStore = useAppStore();
   const appRoute = computed(() => {
     if (appStore.menuFromServer) {
-      return appStore.appAsyncMenus;
+      // 将本地静态路由（如 dashboard）合并到服务端菜单前面
+      return [...appClientMenus, ...appStore.appAsyncMenus];
     }
     return appClientMenus;
   });

@@ -1,6 +1,6 @@
 <template>
   <a-spin style="display: block" :loading="loading">
-    <a-tabs v-model:activeKey="messageType" type="rounded" destroy-on-hide>
+    <a-tabs v-model:active-key="messageType" type="rounded" destroy-on-hide>
       <a-tab-pane v-for="item in tabList" :key="item.key">
         <template #title>
           <span> {{ item.title }}{{ formatUnreadLength(item.key) }} </span>
@@ -68,8 +68,8 @@
   async function fetchSourceData() {
     setLoading(true);
     try {
-      const { data } = await queryMessageList();
-      messageData.messageList = data;
+      const data = await queryMessageList();
+      messageData.messageList = data as MessageListType;
     } catch (err) {
       // you can report use errorHandler or other
     } finally {

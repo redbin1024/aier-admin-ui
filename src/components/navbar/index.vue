@@ -4,13 +4,14 @@
       <a-space>
         <img
           alt="logo"
-          src="//p3-armor.byteimg.com/tos-cn-i-49unhts6dw/dfdba5317c0c20ce20e64fac803d52bc.svg~tplv-49unhts6dw-image.image"
+          src="@/assets/images/xdd-logo.png"
+          style="width: 32px; height: 32px"
         />
         <a-typography-title
           :style="{ margin: 0, fontSize: '18px' }"
           :heading="5"
         >
-          Arco Pro
+          孕妈小叮当
         </a-typography-title>
         <icon-menu-fold
           v-if="!topMenu && appStore.device === 'mobile'"
@@ -23,23 +24,56 @@
       <Menu v-if="topMenu" />
     </div>
     <ul class="right-side">
-      <li>
-        <a-tooltip :content="$t('settings.search')">
-          <a-button class="nav-btn" type="outline" :shape="'circle'">
-            <template #icon>
-              <icon-search />
-            </template>
-          </a-button>
-        </a-tooltip>
+      <li v-permission="['superadmin']">
+        <a-select
+          v-model="companyName"
+          :style="{ width: '280px' }"
+          placeholder="切换商户"
+          allow-clear
+          allow-search
+          @change="dynamicTenantEvent"
+          @clear="dynamicClearEvent"
+        >
+          <template #prefix>
+            <icon-storage />
+          </template>
+          <a-option
+            v-for="item in tenantList"
+            :key="item.tenantId"
+            :value="item.tenantId"
+            :label="item.companyName"
+          />
+        </a-select>
       </li>
       <li>
-        <a-tooltip :content="$t('settings.language')">
-          <a-button
-            class="nav-btn"
-            type="outline"
-            :shape="'circle'"
-            @click="setDropDownVisible"
+        <a-tooltip :content="$t('settings.search')">
+          <a-select
+            v-model="searchValue"
+            :style="{
+              width: '200px',
+              borderRadius: '20px',
+              backgroundColor: 'var(--color-fill-2)',
+            }"
+            :placeholder="$t('settings.search')"
+            allow-search
+            allow-clear
+            @change="handleSearchSelect"
           >
+            <template #prefix>
+              <icon-search />
+            </template>
+            <a-option
+              v-for="item in searchOptions"
+              :key="item.value"
+              :value="item.value"
+              :label="item.label"
+            />
+          </a-select>
+        </a-tooltip>
+      </li>
+      <!-- <li>
+        <a-tooltip :content="$t('settings.language')">
+          <a-button class="nav-btn" type="outline" :shape="'circle'" @click="setDropDownVisible">
             <template #icon>
               <icon-language />
             </template>
@@ -48,11 +82,7 @@
         <a-dropdown trigger="click" @select="changeLocale as any">
           <div ref="triggerBtn" class="trigger-btn"></div>
           <template #content>
-            <a-doption
-              v-for="item in locales"
-              :key="item.value"
-              :value="item.value"
-            >
+            <a-doption v-for="item in locales" :key="item.value" :value="item.value">
               <template #icon>
                 <icon-check v-show="item.value === currentLocale" />
               </template>
@@ -60,7 +90,7 @@
             </a-doption>
           </template>
         </a-dropdown>
-      </li>
+      </li> -->
       <li>
         <a-tooltip
           :content="
@@ -82,33 +112,24 @@
           </a-button>
         </a-tooltip>
       </li>
-      <li>
+      <!-- <li>
         <a-tooltip :content="$t('settings.navbar.alerts')">
           <div class="message-box-trigger">
             <a-badge :count="9" dot>
-              <a-button
-                class="nav-btn"
-                type="outline"
-                :shape="'circle'"
-                @click="setPopoverVisible"
-              >
+              <a-button class="nav-btn" type="outline" :shape="'circle'" @click="setPopoverVisible">
                 <icon-notification />
               </a-button>
             </a-badge>
           </div>
         </a-tooltip>
-        <a-popover
-          trigger="click"
-          :arrow-style="{ display: 'none' }"
-          :content-style="{ padding: 0, minWidth: '400px' }"
-          content-class="message-popover"
-        >
+        <a-popover trigger="click" :arrow-style="{ display: 'none' }" :content-style="{ padding: 0, minWidth: '400px' }"
+          content-class="message-popover">
           <div ref="refBtn" class="ref-btn"></div>
           <template #content>
             <message-box />
           </template>
         </a-popover>
-      </li>
+      </li> -->
       <li>
         <a-tooltip
           :content="
@@ -162,7 +183,7 @@
               </a-space>
             </a-doption>
             <a-doption>
-              <a-space @click="$router.push({ name: 'Info' })">
+              <a-space @click="$router.push({ name: 'UserProfile' })">
                 <icon-user />
                 <span>
                   {{ $t('messageBox.userCenter') }}
@@ -193,22 +214,127 @@
 </template>
 
 <script lang="ts" setup>
-  import { computed, ref, inject } from 'vue';
+  import { computed, ref, inject, onMounted } from 'vue';
   import { Message } from '@arco-design/web-vue';
   import { useDark, useToggle, useFullscreen } from '@vueuse/core';
-  import { useAppStore, useUserStore } from '@/store';
-  import { LOCALE_OPTIONS } from '@/locale';
-  import useLocale from '@/hooks/locale';
+  import { useRouter, RouteRecordRaw } from 'vue-router';
+  import { useI18n } from 'vue-i18n';
+  import { useAppStore, useUserStore, useTabBarStore } from '@/store';
+  // import { LOCALE_OPTIONS } from '@/locale';
+  // import useLocale from '@/hooks/locale';
   import useUser from '@/hooks/user';
   import Menu from '@/components/menu/index.vue';
-  import MessageBox from '../message-box/index.vue';
+  // import MessageBox from '../message-box/index.vue';
+  import {
+    queryOptions,
+    dynamicTenant,
+    clearTenant,
+  } from '@/api/system/tenant';
+  import {
+    getDynamicTenant,
+    setDynamicTenant,
+    clearDynamicTenant,
+  } from '@/utils/auth';
+  import useMenuTree from '../menu/use-menu-tree';
+
+  const companyName = ref('');
+  const tenantList = ref<any[]>([]);
+
+  const router = useRouter();
+  const tabBarStore = useTabBarStore();
+  const { t } = useI18n();
+  const { menuTree } = useMenuTree();
+
+  const searchOptions = computed(() => {
+    const options: { value: string; label: string; path: string }[] = [];
+
+    const traverse = (routes: RouteRecordRaw[], parentTitle = '') => {
+      routes.forEach((route) => {
+        const localeStr = route.meta?.locale as string;
+        let title = '';
+        if (localeStr) {
+          title = localeStr.startsWith('menu.') ? t(localeStr) : localeStr;
+        }
+
+        const fullTitle = parentTitle ? `${parentTitle} - ${title}` : title;
+
+        if (!route.children || route.children.length === 0) {
+          if (route.name && title) {
+            options.push({
+              value: route.name as string,
+              label: fullTitle,
+              path: route.path,
+            });
+          }
+        } else {
+          traverse(route.children, fullTitle);
+        }
+      });
+    };
+
+    traverse(menuTree.value as RouteRecordRaw[]);
+    return options;
+  });
+
+  const searchValue = ref('');
+  const handleSearchSelect = (name: any) => {
+    if (name) {
+      router.push({ name });
+      searchValue.value = '';
+    }
+  };
+
+  const getTenantList = async () => {
+    try {
+      const res: any = await queryOptions();
+      tenantList.value = res.data || [];
+
+      // 初始化时从本地存储恢复选择状态
+      const savedTenantId = getDynamicTenant();
+      if (savedTenantId) {
+        // 检查已保存的 tenantId 是否存在于当前选项中
+        const exists = tenantList.value.some(
+          (item) => String(item.tenantId) === String(savedTenantId)
+        );
+        if (exists) {
+          companyName.value = savedTenantId;
+        } else {
+          // 如果不在列表中，可能是权限变化或者缓存过期，清除本地缓存
+          clearDynamicTenant();
+        }
+      }
+    } catch (error) {
+      Message.error('获取租户列表失败');
+    }
+  };
+
+  const dynamicTenantEvent = async (tenantId: any) => {
+    if (companyName.value != null && companyName.value !== '') {
+      await dynamicTenant(tenantId);
+      setDynamicTenant(String(tenantId));
+      tabBarStore.resetTabList();
+      window.location.href = '/';
+    }
+  };
+
+  const dynamicClearEvent = async () => {
+    await clearTenant();
+    companyName.value = '';
+    clearDynamicTenant();
+    tabBarStore.resetTabList();
+    window.location.href = '/';
+  };
+
+  onMounted(() => {
+    getTenantList();
+  });
 
   const appStore = useAppStore();
   const userStore = useUserStore();
   const { logout } = useUser();
-  const { changeLocale, currentLocale } = useLocale();
+  // const { changeLocale, currentLocale } = useLocale();
   const { isFullscreen, toggle: toggleFullScreen } = useFullscreen();
-  const locales = [...LOCALE_OPTIONS];
+  // const locales = [...LOCALE_OPTIONS];
   const avatar = computed(() => {
     return userStore.avatar;
   });
@@ -234,27 +360,27 @@
   const setVisible = () => {
     appStore.updateSettings({ globalSettings: true });
   };
-  const refBtn = ref();
-  const triggerBtn = ref();
-  const setPopoverVisible = () => {
-    const event = new MouseEvent('click', {
-      view: window,
-      bubbles: true,
-      cancelable: true,
-    });
-    refBtn.value.dispatchEvent(event);
-  };
+  // const refBtn = ref();
+  // const triggerBtn = ref();
+  // const setPopoverVisible = () => {
+  //   const event = new MouseEvent('click', {
+  //     view: window,
+  //     bubbles: true,
+  //     cancelable: true,
+  //   });
+  //   refBtn.value.dispatchEvent(event);
+  // };
   const handleLogout = () => {
     logout();
   };
-  const setDropDownVisible = () => {
-    const event = new MouseEvent('click', {
-      view: window,
-      bubbles: true,
-      cancelable: true,
-    });
-    triggerBtn.value.dispatchEvent(event);
-  };
+  // const setDropDownVisible = () => {
+  //   const event = new MouseEvent('click', {
+  //     view: window,
+  //     bubbles: true,
+  //     cancelable: true,
+  //   });
+  //   triggerBtn.value.dispatchEvent(event);
+  // };
   const switchRoles = async () => {
     const res = await userStore.switchRoles();
     Message.success(res as string);
@@ -285,9 +411,11 @@
     display: flex;
     padding-right: 20px;
     list-style: none;
+
     :deep(.locale-select) {
       border-radius: 20px;
     }
+
     li {
       display: flex;
       align-items: center;
@@ -298,16 +426,19 @@
       color: var(--color-text-1);
       text-decoration: none;
     }
+
     .nav-btn {
       border-color: rgb(var(--gray-2));
       color: rgb(var(--gray-8));
       font-size: 16px;
     }
+
     .trigger-btn,
     .ref-btn {
       position: absolute;
       bottom: 14px;
     }
+
     .trigger-btn {
       margin-left: 14px;
     }

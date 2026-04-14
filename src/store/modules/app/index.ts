@@ -4,6 +4,7 @@ import type { NotificationReturn } from '@arco-design/web-vue/es/notification/in
 import type { RouteRecordNormalized } from 'vue-router';
 import defaultSettings from '@/config/settings.json';
 import { getMenuList } from '@/api/user';
+import { filterAsyncRouter, resetNameRegistry } from '@/utils/menu';
 import { AppState } from './types';
 
 const useAppStore = defineStore('app', {
@@ -52,20 +53,30 @@ const useAppStore = defineStore('app', {
           content: 'loading',
           closable: true,
         });
-        const { data } = await getMenuList();
-        this.serverMenu = data;
+        const { data } = (await getMenuList()) as any;
+        // 重置 name 注册表，防止重复 name 累积
+        resetNameRegistry();
+        // Transform the data and add to router
+        const sdata = JSON.parse(JSON.stringify(data));
+        const asyncRoutes = filterAsyncRouter(sdata);
+
+        this.serverMenu = asyncRoutes;
         notifyInstance = Notification.success({
           id: 'menuNotice',
           content: 'success',
           closable: true,
         });
+        return asyncRoutes;
       } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('[App Store] 获取菜单失败:', error);
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         notifyInstance = Notification.error({
           id: 'menuNotice',
           content: 'error',
           closable: true,
         });
+        return [];
       }
     },
     clearServerMenu() {
