@@ -3,8 +3,17 @@ node_modules
 dist
 dist-ssr
 *.local
-node_modules
-.DS_Store
-dist
-dist-ssr
-*.local
+
+# IDE
+.idea
+.vscode
+
+# Tools
+.claude
+
+# Temp files
+test_module_structure.sh
+project_summary.txt
+FEATURE_GUIDE.md
+README_VIDEO_TUTORIAL.md
+package-lock.json
