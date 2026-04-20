@@ -1,0 +1,9 @@
+node_modules
+.git
+.husky
+.env.development
+.env*.local
+dist
+dist-ssr
+*.md
+.DS_Store
