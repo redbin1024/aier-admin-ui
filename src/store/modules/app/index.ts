@@ -61,6 +61,7 @@ const useAppStore = defineStore('app', {
         const asyncRoutes = filterAsyncRouter(sdata);
 
         this.serverMenu = asyncRoutes;
+        this.serverMenuFetched = true;
         notifyInstance = Notification.success({
           id: 'menuNotice',
           content: 'success',
@@ -76,11 +77,13 @@ const useAppStore = defineStore('app', {
           content: 'error',
           closable: true,
         });
+        this.serverMenuFetched = true;
         return [];
       }
     },
     clearServerMenu() {
       this.serverMenu = [];
+      this.serverMenuFetched = false;
     },
   },
 });

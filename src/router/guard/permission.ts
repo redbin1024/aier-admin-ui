@@ -1,6 +1,4 @@
 import type { Router, RouteRecordNormalized } from 'vue-router';
-import NProgress from 'nprogress'; // progress bar
-
 import usePermission from '@/hooks/permission';
 import { useUserStore, useAppStore } from '@/store';
 import { appRoutes } from '../routes';
@@ -20,7 +18,7 @@ export default function setupPermissionGuard(router: Router) {
       // Refine the permission logic from the server's menu configuration as needed
       let isFetched = false;
       if (
-        !appStore.appAsyncMenus.length &&
+        !appStore.serverMenuFetched &&
         !WHITE_LIST.find((el) => el.name === to.name)
       ) {
         try {
@@ -81,6 +79,5 @@ export default function setupPermissionGuard(router: Router) {
         next(destination);
       }
     }
-    NProgress.done();
   });
 }

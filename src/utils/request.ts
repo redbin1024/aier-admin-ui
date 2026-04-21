@@ -2,7 +2,6 @@
 import { createAlova } from 'alova';
 import adapterFetch from 'alova/fetch';
 import { Message, Modal, Notification } from '@arco-design/web-vue';
-import NProgress from 'nprogress';
 import { clearToken, getToken } from './auth';
 import encryptRSA from './jsencrypt';
 import { encryptBase64, encryptWithAes, generateAesKey } from './crypto';
@@ -41,10 +40,8 @@ interface AlovaMethodLike {
 const alovaInstance = createAlova({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   requestAdapter: adapterFetch(),
-  timeout: 100000,
+  timeout: 15000,
   beforeRequest(method: AlovaMethodLike) {
-    NProgress.start();
-
     const headers = (method.config.headers || {}) as RequestHeaders;
     method.config.headers = headers;
 
@@ -96,8 +93,6 @@ const alovaInstance = createAlova({
     }
   },
   async responded(response: Response, method: AlovaMethodLike) {
-    NProgress.done();
-
     if ((method.config as RequestConfig).responseType === 'blob') {
       return response.blob();
     }
