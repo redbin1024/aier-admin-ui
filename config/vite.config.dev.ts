@@ -1,5 +1,4 @@
 import { defineConfig, loadEnv, mergeConfig } from 'vite';
-import eslint from 'vite-plugin-eslint';
 import baseConfig from './vite.config.base';
 
 export default defineConfig(({ mode }) => {
@@ -27,15 +26,6 @@ export default defineConfig(({ mode }) => {
           },
         },
       },
-      plugins: [
-        eslint({
-          cache: true,
-          include: ['src/**/*.ts', 'src/**/*.tsx', 'src/**/*.vue'],
-          exclude: ['node_modules'],
-          failOnWarning: false,
-          failOnError: false,
-        }),
-      ],
     },
     baseConfig
   );

@@ -5,16 +5,37 @@ import configVisualizerPlugin from './plugin/visualizer';
 import configArcoResolverPlugin from './plugin/arcoResolver';
 import configImageminPlugin from './plugin/imagemin';
 
+function appendPlugins(
+  target: any[],
+  pluginOrPlugins: any | any[]
+): void {
+  if (!pluginOrPlugins) return;
+  if (Array.isArray(pluginOrPlugins)) {
+    target.push(...pluginOrPlugins);
+    return;
+  }
+  target.push(pluginOrPlugins);
+}
+
+const plugins: any[] = [];
+
+appendPlugins(plugins, configVisualizerPlugin());
+appendPlugins(plugins, configArcoResolverPlugin());
+
+if (process.env.BUILD_IMAGEMIN === 'true') {
+  appendPlugins(plugins, configImageminPlugin());
+}
+
+if (process.env.BUILD_COMPRESS === 'true') {
+  appendPlugins(plugins, configCompressPlugin('gzip'));
+}
+
 export default mergeConfig(
   {
     mode: 'production',
-    plugins: [
-      configCompressPlugin('gzip'),
-      configVisualizerPlugin(),
-      configArcoResolverPlugin(),
-      configImageminPlugin(),
-    ],
+    plugins,
     build: {
+      reportCompressedSize: false,
       rollupOptions: {
         output: {
           manualChunks: {

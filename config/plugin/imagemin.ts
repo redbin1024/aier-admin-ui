@@ -3,9 +3,15 @@
  * 图片压缩
  * https://github.com/anncwb/vite-plugin-imagemin
  */
-import viteImagemin from 'vite-plugin-imagemin';
-
 export default function configImageminPlugin() {
+  let viteImagemin: any;
+  try {
+    viteImagemin = (Function('return require')() as any)('vite-plugin-imagemin').default;
+  } catch (error) {
+    throw new Error(
+      'BUILD_IMAGEMIN=true 需要安装 vite-plugin-imagemin（已默认关闭图片压缩以提升构建稳定性）'
+    );
+  }
   const imageminPlugin = viteImagemin({
     gifsicle: {
       optimizationLevel: 7,

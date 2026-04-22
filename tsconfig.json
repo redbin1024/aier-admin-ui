@@ -13,7 +13,9 @@
       "@/*": ["src/*"]
     },
     "lib": ["es2020", "dom"],
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "incremental": true,
+    "tsBuildInfoFile": "node_modules/.cache/tsconfig.tsbuildinfo"
   },
   "include": ["src/**/*", "src/**/*.vue"],
   "exclude": ["node_modules"]
