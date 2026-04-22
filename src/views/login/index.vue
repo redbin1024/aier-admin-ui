@@ -15,7 +15,7 @@
           <h1 class="brand-name">小叮当</h1>
         </div>
         <p class="brand-slogan">管理尽在掌握</p>
-        <h2 class="brand-title">孕妈小叮当<br />后台管理系统</h2>
+        <h2 class="brand-title">宝妈小叮当<br />后台管理系统</h2>
         <div class="brand-tags">
           <span v-for="tag in ['专业', '易用', '高效']" :key="tag" class="tag">
             <span class="tag-dot"></span>

@@ -79,7 +79,10 @@
           <a-button @click="resetQuery">重置</a-button>
         </a-space>
         <a-space>
-          <a-button status="warning" @click="handleExport">导出</a-button>
+          <a-button type="primary" status="warning" @click="handleExport">
+            <template #icon><icon-download /></template>
+            导出
+          </a-button>
         </a-space>
       </div>
 
@@ -167,7 +170,7 @@
           </a-table-column>
           <a-table-column
             title="操作"
-            :width="220"
+            :width="320"
             align="center"
             fixed="right"
           >
@@ -423,6 +426,7 @@
 <script lang="ts" setup>
   import { computed, ref } from 'vue';
   import { Message, Modal } from '@arco-design/web-vue';
+  import { IconDownload } from '@arco-design/web-vue/es/icon';
   import {
     cancelOrder,
     collectContractPayment,

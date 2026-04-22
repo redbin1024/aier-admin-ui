@@ -1,6 +1,6 @@
 <template>
   <div class="package-page">
-    <a-card :bordered="false" class="main-card">
+    <a-card :bordered="false" class="general-card" :body-style="{ padding: '24px' }">
       <div class="toolbar">
         <div class="toolbar-title">
           <icon-apps :size="20" />
@@ -92,18 +92,12 @@
       </div>
     </a-card>
 
-    <!-- 新增/编辑弹窗 -->
-    <a-modal
+    <package-modal
       v-model:visible="formVisible"
       :title="formTitle"
-      :width="560"
-      :mask-closable="false"
-      modal-class="package-modal"
-      @cancel="handleCancel"
-      @before-ok="handleSubmit"
-    >
-      <package-form ref="formRef" :form-data="formData" />
-    </a-modal>
+      :form-data="formData"
+      @submitted="handleSubmitted"
+    />
   </div>
 </template>
 
@@ -126,7 +120,7 @@
     updatePackage,
   } from '@/api/platform/nursePackage';
   import type { NursePackage, NursePackageQuery } from '@/types/maternity';
-  import PackageForm from './form.vue';
+  import PackageModal from './components/PackageModal.vue';
 
   const loading = ref(false);
   const dataList = ref<NursePackage[]>([]);
@@ -141,7 +135,6 @@
   const formVisible = ref(false);
   const formTitle = ref('');
   const formData = ref<Partial<NursePackage>>({});
-  const formRef = ref();
 
   async function getList() {
     loading.value = true;
@@ -206,18 +199,8 @@
     }
   }
 
-  async function handleSubmit(done: (closed: boolean) => void) {
-    const valid = await formRef.value?.validate();
-    if (!valid) {
-      done(false);
-      return;
-    }
-    done(true);
+  function handleSubmitted() {
     getList();
-  }
-
-  function handleCancel() {
-    formVisible.value = false;
   }
 
   getList();
@@ -230,13 +213,7 @@
 
 <style lang="less" scoped>
   .package-page {
-    .main-card {
-      border-radius: 12px;
-
-      :deep(.arco-card-body) {
-        padding: 24px;
-      }
-    }
+    padding: 16px 20px;
 
     .toolbar {
       display: flex;
@@ -252,10 +229,6 @@
       color: var(--color-text-1);
       font-weight: 600;
       font-size: 16px;
-    }
-
-    :deep(.arco-btn) {
-      border-radius: 8px;
     }
 
     .package-card {

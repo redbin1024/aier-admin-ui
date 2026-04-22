@@ -1,6 +1,6 @@
 <template>
   <div class="video-tutorial-page">
-    <a-card :bordered="false" class="main-card">
+    <a-card :bordered="false" class="general-card" :body-style="{ padding: '20px' }">
       <div class="toolbar">
         <a-space wrap>
           <a-input
@@ -44,7 +44,7 @@
             <template #icon><icon-plus /></template>
             新增视频
           </a-button>
-          <a-button status="warning" @click="handleExport">
+          <a-button type="primary" status="warning" @click="handleExport">
             <template #icon><icon-download /></template>
             导出
           </a-button>
@@ -127,7 +127,7 @@
             </template>
           </a-table-column>
           <a-table-column title="创建时间" data-index="createTime" :width="180" />
-          <a-table-column title="操作" :width="200" fixed="right" align="center">
+          <a-table-column title="操作" :width="320" fixed="right" align="center">
             <template #cell="{ record }">
               <a-space>
                 <a-button type="text" size="small" @click="handleView(record)">
@@ -154,18 +154,13 @@
       </a-table>
     </a-card>
 
-    <!-- 新增/编辑弹窗 -->
-    <a-modal
+    <video-tutorial-modal
       v-model:visible="formVisible"
       :title="formTitle"
-      :width="720"
-      :mask-closable="false"
-      modal-class="video-modal"
-      @cancel="handleCancel"
-      @before-ok="handleSubmit"
-    >
-      <video-tutorial-form ref="formRef" :form-data="formData" :is-view="isView" />
-    </a-modal>
+      :form-data="formData"
+      :is-view="isView"
+      @submitted="handleSubmitted"
+    />
   </div>
 </template>
 
@@ -194,7 +189,7 @@
     type VideoTutorial,
     type VideoTutorialQuery,
   } from '@/types/videoTutorial';
-  import VideoTutorialForm from './form.vue';
+  import VideoTutorialModal from './components/VideoTutorialModal.vue';
 
   const loading = ref(false);
   const dataList = ref<VideoTutorial[]>([]);
@@ -231,7 +226,6 @@
   const formVisible = ref(false);
   const formTitle = ref('');
   const formData = ref<Partial<VideoTutorial>>({});
-  const formRef = ref();
   const isView = ref(false);
 
   // 获取列表数据
@@ -353,20 +347,8 @@
     }
   }
 
-  // 提交表单
-  async function handleSubmit(done: (closed: boolean) => void) {
-    const valid = await formRef.value?.validate();
-    if (!valid) {
-      done(false);
-      return;
-    }
-    done(true);
+  function handleSubmitted() {
     getList();
-  }
-
-  // 取消
-  function handleCancel() {
-    formVisible.value = false;
   }
 
   // 获取分类文本
@@ -396,13 +378,7 @@
 
 <style lang="less" scoped>
   .video-tutorial-page {
-    .main-card {
-      border-radius: 12px;
-
-      :deep(.arco-card-body) {
-        padding: 20px;
-      }
-    }
+    padding: 16px 20px;
 
     .toolbar {
       display: flex;
@@ -412,31 +388,8 @@
       gap: 12px;
     }
 
-    :deep(.arco-input-wrapper) {
-      border-radius: 8px;
-    }
-
-    :deep(.arco-select-view-single) {
-      border-radius: 8px;
-    }
-
-    :deep(.arco-btn) {
-      border-radius: 8px;
-    }
-
-    :deep(.arco-table) {
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    :deep(.arco-table-th) {
-      background: var(--color-fill-1);
-      font-weight: 500;
-    }
-
     .cover-cell {
       :deep(.arco-image) {
-        border-radius: 6px;
         overflow: hidden;
       }
     }
@@ -446,28 +399,5 @@
       font-size: 12px;
     }
 
-    :deep(.arco-tag) {
-      border-radius: 6px;
-    }
-  }
-</style>
-
-<style lang="less">
-  .video-modal {
-    .arco-modal {
-      border-radius: 14px;
-    }
-
-    .arco-modal-header {
-      border-radius: 14px 14px 0 0;
-    }
-
-    .arco-modal-footer {
-      border-radius: 0 0 14px 14px;
-
-      .arco-btn {
-        border-radius: 8px;
-      }
-    }
   }
 </style>

@@ -41,6 +41,9 @@ const alovaInstance = createAlova({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   requestAdapter: adapterFetch(),
   timeout: 15000,
+  cacheFor: {
+    GET: 0,
+  },
   beforeRequest(method: AlovaMethodLike) {
     const headers = (method.config.headers || {}) as RequestHeaders;
     method.config.headers = headers;

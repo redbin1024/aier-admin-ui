@@ -165,13 +165,6 @@
       font-weight: 500;
     }
 
-    :deep(.arco-input-wrapper),
-    :deep(.arco-select-view-single),
-    :deep(.arco-textarea-wrapper),
-    :deep(.arco-input-number) {
-      border-radius: 8px !important;
-    }
-
     .form-tip {
       margin-top: 4px;
       color: var(--color-text-3);

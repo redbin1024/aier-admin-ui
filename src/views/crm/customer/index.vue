@@ -85,10 +85,14 @@
           <a-button @click="resetQuery">重置</a-button>
         </a-space>
         <a-space>
-          <a-button type="primary" status="success" @click="handleAdd"
-            >新增客户</a-button
-          >
-          <a-button status="warning" @click="handleExport">导出</a-button>
+          <a-button type="primary" @click="handleAdd">
+            <template #icon><icon-plus /></template>
+            新增客户
+          </a-button>
+          <a-button type="primary" status="warning" @click="handleExport">
+            <template #icon><icon-download /></template>
+            导出
+          </a-button>
         </a-space>
       </div>
 
@@ -292,6 +296,7 @@
 <script lang="ts" setup>
   import { computed, ref } from 'vue';
   import { Message, Modal } from '@arco-design/web-vue';
+  import { IconPlus, IconDownload } from '@arco-design/web-vue/es/icon';
   import { useRouter } from 'vue-router';
   import dayjs from 'dayjs';
   import {

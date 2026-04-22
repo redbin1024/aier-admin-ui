@@ -37,7 +37,6 @@
 
     <a-form-item label="视频文件" field="videoUrl">
       <div class="upload-section">
-        <!-- 视频预览 -->
         <div v-if="form.videoUrl" class="preview-card video-preview-card">
           <video :src="form.videoUrl" controls class="preview-video" />
           <div v-if="!isView" class="preview-overlay" @click="removeVideo">
@@ -45,7 +44,6 @@
             <span>移除视频</span>
           </div>
         </div>
-        <!-- 上传区域 -->
         <a-upload
           v-if="!form.videoUrl && !isView"
           :custom-request="handleVideoUpload"
@@ -75,7 +73,6 @@
 
     <a-form-item label="封面图片" field="coverImage">
       <div class="upload-section cover-section">
-        <!-- 封面预览 -->
         <div v-if="form.coverImage" class="preview-card cover-preview-card">
           <img :src="form.coverImage" class="preview-cover" />
           <div v-if="!isView" class="preview-overlay" @click="removeCover">
@@ -83,7 +80,6 @@
             <span>移除封面</span>
           </div>
         </div>
-        <!-- 上传区域 -->
         <a-upload
           v-if="!form.coverImage && !isView"
           :custom-request="handleCoverUpload"
@@ -191,7 +187,6 @@
     status: [{ required: true, message: '请选择状态' }],
   };
 
-  // 监听表单数据变化
   watch(
     () => props.formData,
     (newVal) => {
@@ -205,9 +200,6 @@
     { immediate: true, deep: true }
   );
 
-  /**
-   * 上传文件到 OSS
-   */
   async function uploadToOSS(file: File): Promise<string> {
     const formData = new FormData();
     formData.append('file', file);
@@ -226,13 +218,11 @@
 
     const res = await response.json();
     if (res.code === 200) {
-      // 返回的 url 字段即为 OSS 地址
       return res.data?.url || res.url || res.data?.fileName || '';
     }
     throw new Error(res.msg || '上传失败');
   }
 
-  // 视频上传
   async function handleVideoUpload(option: any) {
     const { onSuccess, onError, fileItem } = option;
     if (!fileItem.file) {
@@ -253,7 +243,6 @@
     }
   }
 
-  // 封面上传
   async function handleCoverUpload(option: any) {
     const { onSuccess, onError, fileItem } = option;
     if (!fileItem.file) {
@@ -274,17 +263,14 @@
     }
   }
 
-  // 移除视频
   function removeVideo() {
     form.value.videoUrl = '';
   }
 
-  // 移除封面
   function removeCover() {
     form.value.coverImage = '';
   }
 
-  // 验证表单
   async function validate(): Promise<boolean> {
     if (props.isView) return true;
 
@@ -300,7 +286,6 @@
     }
   }
 
-  // 提交表单
   async function submitForm() {
     try {
       if (form.value.tutorialId) {
@@ -315,7 +300,6 @@
     }
   }
 
-  // 重置表单
   function resetFields() {
     formRef.value?.resetFields();
   }
@@ -331,22 +315,6 @@
     :deep(.arco-form-item-label) {
       font-weight: 500;
       color: var(--color-text-1);
-    }
-
-    :deep(.arco-input-wrapper),
-    :deep(.arco-select-view-single),
-    :deep(.arco-textarea-wrapper),
-    :deep(.arco-input-number) {
-      border-radius: 8px !important;
-    }
-
-    :deep(.arco-radio-group-type-button) {
-      border-radius: 8px;
-      overflow: hidden;
-
-      .arco-radio-button {
-        border-radius: 0;
-      }
     }
   }
 

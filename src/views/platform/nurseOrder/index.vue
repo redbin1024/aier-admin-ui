@@ -1,6 +1,6 @@
 <template>
   <div class="order-page">
-    <a-card :bordered="false" class="main-card">
+    <a-card :bordered="false" class="general-card" :body-style="{ padding: '20px' }">
       <!-- 搜索栏 -->
       <div class="toolbar">
         <a-space wrap>
@@ -202,6 +202,7 @@
     getOrderStatusColor,
     type NurseOrder,
     type NurseOrderQuery,
+    type OrderStatus,
   } from '@/types/maternity';
 
   const router = useRouter();
@@ -263,7 +264,8 @@
   }
 
   function handleTabChange(key: string | number) {
-    queryParams.orderStatus = key as string;
+    const next = String(key);
+    queryParams.orderStatus = next ? (next as OrderStatus) : '';
     queryParams.pageNum = 1;
     getList();
   }
@@ -323,13 +325,7 @@
 
 <style lang="less" scoped>
   .order-page {
-    .main-card {
-      border-radius: 12px;
-
-      :deep(.arco-card-body) {
-        padding: 20px;
-      }
-    }
+    padding: 16px 20px;
 
     .toolbar {
       display: flex;
@@ -339,20 +335,8 @@
       margin-bottom: 16px;
     }
 
-    :deep(.arco-input-wrapper) {
-      border-radius: 8px;
-    }
-
-    :deep(.arco-btn) {
-      border-radius: 8px;
-    }
-
     :deep(.arco-tabs-nav-tab) {
       margin-bottom: 16px;
-    }
-
-    :deep(.arco-tag) {
-      border-radius: 6px;
     }
   }
 

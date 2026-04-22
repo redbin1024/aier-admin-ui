@@ -296,22 +296,23 @@
 
   const orderId = computed(() => Number(route.params.orderId));
 
-  const order = ref<Partial<NurseOrder>>({
+  const order = ref<NurseOrder>({
+    customerName: '',
+    customerTel: '',
+    serviceAddress: '',
     orderStatus: 'PENDING',
   });
   const serviceLogs = ref<ServiceLog[]>([]);
   const reviews = ref<NurseReview[]>([]);
 
-  const currentStep = computed(() =>
-    getOrderStepIndex(order.value.orderStatus as any)
-  );
+  const currentStep = computed(() => getOrderStepIndex(order.value.orderStatus));
 
   async function loadDetail() {
     loading.value = true;
     try {
       const res: any = await getOrder(orderId.value);
       const data = res.data || res;
-      order.value = data;
+      order.value = data as NurseOrder;
       serviceLogs.value = data.serviceLogs || [];
     } catch {
       Message.error('获取订单详情失败');
@@ -371,6 +372,8 @@
 
 <style lang="less" scoped>
   .order-detail-page {
+    padding: 16px 20px;
+
     :deep(.arco-page-header) {
       padding: 0 0 12px;
     }
@@ -378,11 +381,6 @@
 
   .section-card {
     margin-bottom: 16px;
-    border-radius: 12px;
-
-    :deep(.arco-card-body) {
-      padding: 20px;
-    }
   }
 
   .section-title {

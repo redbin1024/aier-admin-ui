@@ -149,7 +149,7 @@
       <a-card :bordered="false" class="section-card">
         <template #title>
           <div class="section-title">
-            <icon-money-collect :size="18" />
+            <icon-alipay-circle :size="18" />
             <span>费用信息</span>
           </div>
         </template>
@@ -295,7 +295,7 @@
   import {
     IconUser,
     IconStar,
-    IconMoneyCollect,
+    IconAlipayCircle,
     IconPlus,
     IconSearch,
   } from '@arco-design/web-vue/es/icon';
@@ -456,28 +456,15 @@
 
 <style lang="less" scoped>
   .order-create-page {
+    padding: 16px 20px;
+
     :deep(.arco-page-header) {
       padding: 0 0 12px;
     }
   }
 
-  .create-form {
-    :deep(.arco-input-wrapper),
-    :deep(.arco-select-view-single),
-    :deep(.arco-textarea-wrapper),
-    :deep(.arco-input-number),
-    :deep(.arco-picker) {
-      border-radius: 8px !important;
-    }
-  }
-
   .section-card {
     margin-bottom: 16px;
-    border-radius: 12px;
-
-    :deep(.arco-card-body) {
-      padding: 20px;
-    }
   }
 
   .section-title {

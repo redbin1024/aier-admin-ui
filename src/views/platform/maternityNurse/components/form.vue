@@ -127,7 +127,6 @@
       />
     </a-form-item>
 
-    <!-- ========== 个人亮点 ========== -->
     <a-form-item label="个人亮点" field="highlights">
       <div class="dynamic-list-section">
         <div
@@ -163,7 +162,6 @@
       </div>
     </a-form-item>
 
-    <!-- ========== 工作经历 ========== -->
     <a-form-item label="工作经历" field="workExperience">
       <div class="experience-section">
         <div
@@ -194,15 +192,8 @@
               </a-form-item>
             </a-col>
             <a-col :span="12">
-              <a-form-item
-                label="职位"
-                :hide-label="false"
-                class="nested-form-item"
-              >
-                <a-input
-                  v-model="exp.position"
-                  placeholder="如：高级月嫂（住家）"
-                />
+              <a-form-item label="职位" :hide-label="false" class="nested-form-item">
+                <a-input v-model="exp.position" placeholder="如：高级月嫂（住家）" />
               </a-form-item>
             </a-col>
           </a-row>
@@ -278,7 +269,6 @@
       </div>
     </a-form-item>
 
-    <!-- ========== 专业技能 ========== -->
     <a-form-item label="专业技能" field="professionalSkills">
       <div class="dynamic-list-section" style="width: 100%">
         <div
@@ -296,22 +286,11 @@
             placeholder="技能描述，如：黄疸观察、脐部护理、红臀预防..."
             style="flex: 1"
           />
-          <a-button
-            type="text"
-            status="danger"
-            size="small"
-            @click="removeSkill(idx)"
-          >
+          <a-button type="text" status="danger" size="small" @click="removeSkill(idx)">
             <template #icon><icon-minus-circle /></template>
           </a-button>
         </div>
-        <a-button
-          type="dashed"
-          long
-          size="small"
-          class="add-btn"
-          @click="addSkill"
-        >
+        <a-button type="dashed" long size="small" class="add-btn" @click="addSkill">
           <template #icon><icon-plus /></template>
           添加技能
         </a-button>
@@ -348,11 +327,7 @@
 
     <a-form-item label="视频" field="videos">
       <div class="photo-upload-section">
-        <div
-          v-for="(url, idx) in form.videos || []"
-          :key="idx"
-          class="photo-preview-item"
-        >
+        <div v-for="(url, idx) in form.videos || []" :key="idx" class="photo-preview-item">
           <video :src="url" class="photo-img" />
           <div class="photo-overlay" @click="removeVideo(idx)">
             <icon-delete :size="16" />
@@ -374,7 +349,6 @@
       </div>
     </a-form-item>
 
-    <!-- ========== 证书图片 ========== -->
     <a-form-item label="证书图片" field="certificateImages">
       <div class="photo-upload-section">
         <div
@@ -403,7 +377,6 @@
       </div>
     </a-form-item>
 
-    <!-- ========== 健康证明图片 ========== -->
     <a-form-item label="健康证明图片" field="healthImages">
       <div class="photo-upload-section">
         <div
@@ -513,29 +486,33 @@
     { label: '晚班', value: '晚班' },
   ];
 
-  const form = ref<MaternityNurseForm>({
-    nurseName: '',
-    nurseTel: '',
-    level: 3,
-    serviceArea: '',
-    price: undefined,
-    status: 'ONLINE',
-    nursePhotoUrl: [],
-    nurseProfile: '',
-    packageName: '',
-    description: [],
-    videos: [],
-    category: '',
-    useCount: 0,
-    serviceMode: '',
-    contractGiftId: undefined,
-    isExistContractGift: false,
-    highlights: [],
-    workExperience: [],
-    professionalSkills: [],
-    certificateImages: [],
-    healthImages: [],
-  });
+  function createDefaultForm(): MaternityNurseForm {
+    return {
+      nurseName: '',
+      nurseTel: '',
+      level: 3,
+      serviceArea: '',
+      price: undefined,
+      status: 'ONLINE',
+      nursePhotoUrl: [],
+      nurseProfile: '',
+      packageName: '',
+      description: [],
+      videos: [],
+      category: '',
+      useCount: 0,
+      serviceMode: '',
+      contractGiftId: undefined,
+      isExistContractGift: false,
+      highlights: [],
+      workExperience: [],
+      professionalSkills: [],
+      certificateImages: [],
+      healthImages: [],
+    };
+  }
+
+  const form = ref<MaternityNurseForm>(createDefaultForm());
 
   const rules: Record<string, FieldRule[]> = {
     nurseName: [{ required: true, message: '请输入月嫂姓名' }],
@@ -571,7 +548,7 @@
     (newVal) => {
       if (newVal) {
         form.value = {
-          ...form.value,
+          ...createDefaultForm(),
           ...newVal,
           nursePhotoUrl: newVal.nursePhotoUrl || [],
           description: newVal.description || [],
@@ -594,7 +571,6 @@
     { immediate: true, deep: true }
   );
 
-  // ========== 文件上传 ==========
   async function uploadToOSS(file: File): Promise<string> {
     const formData = new FormData();
     formData.append('file', file);
@@ -679,7 +655,6 @@
     form.value.videos?.splice(idx, 1);
   }
 
-  // ========== 证书图片上传 ==========
   async function handleCertificateUpload(option: any) {
     const { onSuccess, onError, fileItem } = option;
     if (!fileItem.file) {
@@ -702,7 +677,6 @@
     form.value.certificateImages?.splice(idx, 1);
   }
 
-  // ========== 健康证明图片上传 ==========
   async function handleHealthUpload(option: any) {
     const { onSuccess, onError, fileItem } = option;
     if (!fileItem.file) {
@@ -725,7 +699,6 @@
     form.value.healthImages?.splice(idx, 1);
   }
 
-  // ========== 个人亮点 ==========
   function addHighlight() {
     if (!form.value.highlights) form.value.highlights = [];
     form.value.highlights.push('');
@@ -735,7 +708,6 @@
     form.value.highlights?.splice(idx, 1);
   }
 
-  // ========== 工作经历 ==========
   function addExperience() {
     if (!form.value.workExperience) form.value.workExperience = [];
     form.value.workExperience.push({
@@ -751,7 +723,6 @@
     form.value.workExperience?.splice(idx, 1);
   }
 
-  // ========== 专业技能 ==========
   function addSkill() {
     if (!form.value.professionalSkills) form.value.professionalSkills = [];
     form.value.professionalSkills.push({ skillName: '', skillDesc: '' });
@@ -761,7 +732,6 @@
     form.value.professionalSkills?.splice(idx, 1);
   }
 
-  // ========== 提交 ==========
   async function submitForm() {
     if (form.value.nurseId) {
       await updateNurse(form.value);
@@ -797,22 +767,6 @@
     :deep(.arco-form-item-label) {
       color: var(--color-text-1);
       font-weight: 500;
-    }
-
-    :deep(.arco-input-wrapper),
-    :deep(.arco-select-view-single),
-    :deep(.arco-textarea-wrapper),
-    :deep(.arco-input-number) {
-      border-radius: 8px !important;
-    }
-
-    :deep(.arco-radio-group-type-button) {
-      overflow: hidden;
-      border-radius: 8px;
-
-      .arco-radio-button {
-        border-radius: 0;
-      }
     }
   }
 
@@ -890,7 +844,6 @@
     }
   }
 
-  /* 动态列表 */
   .dynamic-list-section {
     display: flex;
     flex-direction: column;
@@ -914,7 +867,6 @@
     }
   }
 
-  /* 工作经历卡片 */
   .experience-section {
     display: flex;
     flex-direction: column;
@@ -956,7 +908,6 @@
     }
   }
 
-  /* 技能行 */
   .skill-row {
     display: flex;
     gap: 8px;

@@ -6,7 +6,7 @@
     :mask-closable="false"
     modal-class="service-log-modal"
     @cancel="handleClose"
-    @before-ok="handleSubmit"
+    :on-before-ok="handleSubmit"
   >
     <!-- 订单摘要 -->
     <div class="order-summary">

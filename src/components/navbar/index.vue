@@ -11,7 +11,7 @@
           :style="{ margin: 0, fontSize: '18px' }"
           :heading="5"
         >
-          孕妈小叮当
+          宝妈小叮当
         </a-typography-title>
         <icon-menu-fold
           v-if="!topMenu && appStore.device === 'mobile'"
