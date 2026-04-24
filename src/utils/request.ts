@@ -54,7 +54,10 @@ const alovaInstance = createAlova({
     }
 
     headers.clientId = import.meta.env.VITE_CLIENT_ID;
-    if (!headers['Content-Type']) {
+    // FormData 必须让 fetch 自己写 Content-Type（附带 boundary），否则后端解析不到 multipart 字段
+    if (method.data instanceof FormData) {
+      delete headers['Content-Type'];
+    } else if (!headers['Content-Type']) {
       headers['Content-Type'] = 'application/json;charset=UTF-8';
     }
 

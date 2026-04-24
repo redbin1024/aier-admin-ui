@@ -203,6 +203,8 @@
     }
 
     const formData = new FormData();
+    // 后端 @RequestPart 同时兼容 file / avatarfile 两种命名，两个都传最稳
+    formData.append('file', selectedFile.value, selectedFile.value.name);
     formData.append('avatarfile', selectedFile.value, selectedFile.value.name);
 
     submitting.value = true;

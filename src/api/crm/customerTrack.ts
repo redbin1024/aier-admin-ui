@@ -112,9 +112,6 @@ export function getAssignmentStats(query?: any) {
 
 export function importCustomerExcel(data: FormData) {
   return request.post('/platform/customer/importExcel', data, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
     timeout: 120000,
   });
 }

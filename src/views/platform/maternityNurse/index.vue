@@ -137,6 +137,13 @@
               <span v-for="i in 5" :key="i" class="star" :class="{ filled: i <= (printNurse?.level || 0) }">★</span>
               <span class="star-label">{{ printNurse?.level || 0 }}星月嫂</span>
             </div>
+            <div class="resume-summary-tags">
+              <span v-if="printNurse?.category" class="summary-tag">{{ printNurse.category }}</span>
+              <span v-if="printNurse?.serviceMode" class="summary-tag">{{ printNurse.serviceMode }}</span>
+              <span v-if="printNurse?.serviceArea" class="summary-tag">服务区域：{{ printNurse.serviceArea }}</span>
+              <span class="summary-tag">累计服务 {{ printNurse?.useCount ?? 0 }} 次</span>
+              <span v-if="printNurse?.reviewCount != null" class="summary-tag">{{ printNurse.reviewCount }} 条评价</span>
+            </div>
             <div class="resume-meta-grid">
               <div v-if="printNurse?.category" class="meta-item">
                 <span class="meta-label">分类</span>
@@ -168,7 +175,34 @@
                 <span class="meta-label">评分</span>
                 <span class="meta-value">{{ printNurse.avgRating }}</span>
               </div>
+              <div v-if="printNurse?.reviewCount != null" class="meta-item">
+                <span class="meta-label">评价数量</span>
+                <span class="meta-value">{{ printNurse.reviewCount }} 条</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">当前状态</span>
+                <span class="meta-value">{{ printNurse?.status === 'ONLINE' ? '上线' : '下线' }}</span>
+              </div>
             </div>
+          </div>
+        </div>
+
+        <div class="resume-overview">
+          <div class="overview-card">
+            <div class="overview-label">综合星级</div>
+            <div class="overview-value">{{ printNurse?.level || 0 }} 星</div>
+          </div>
+          <div class="overview-card">
+            <div class="overview-label">参考价格</div>
+            <div class="overview-value">{{ printNurse?.price != null ? `¥${printNurse.price}` : '-' }}</div>
+          </div>
+          <div class="overview-card">
+            <div class="overview-label">客户评分</div>
+            <div class="overview-value">{{ printNurse?.avgRating ?? '-' }}</div>
+          </div>
+          <div class="overview-card">
+            <div class="overview-label">服务次数</div>
+            <div class="overview-value">{{ printNurse?.useCount ?? 0 }} 次</div>
           </div>
         </div>
 
@@ -190,6 +224,30 @@
           <div class="section-title"><span class="title-icon">📋</span> 个人简介</div>
           <div class="section-content">
             <p>{{ printNurse.nurseProfile }}</p>
+          </div>
+        </div>
+
+        <div class="resume-section">
+          <div class="section-title"><span class="title-icon">🧾</span> 服务概况</div>
+          <div class="section-content">
+            <div class="service-overview-grid">
+              <div class="service-item">
+                <span class="service-item-label">服务方式</span>
+                <span class="service-item-value">{{ printNurse?.serviceMode || '待补充' }}</span>
+              </div>
+              <div class="service-item">
+                <span class="service-item-label">服务区域</span>
+                <span class="service-item-value">{{ printNurse?.serviceArea || '待补充' }}</span>
+              </div>
+              <div class="service-item">
+                <span class="service-item-label">套餐名称</span>
+                <span class="service-item-value">{{ printNurse?.packageName || '待补充' }}</span>
+              </div>
+              <div class="service-item">
+                <span class="service-item-label">签约礼品</span>
+                <span class="service-item-value">{{ printNurse?.isExistContractGift ? '已领取' : '未领取' }}</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -222,6 +280,17 @@
                 <span class="skill-name">{{ skill.skillName }}</span>
                 <span class="skill-desc">{{ skill.skillDesc }}</span>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="printNurse?.contractGift?.giftName || printNurse?.contractGift?.description" class="resume-section">
+          <div class="section-title"><span class="title-icon">🎁</span> 签约礼品</div>
+          <div class="section-content">
+            <div class="gift-card">
+              <div class="gift-title">{{ printNurse?.contractGift?.giftName || '签约礼品' }}</div>
+              <div v-if="printNurse?.contractGift?.description" class="gift-desc">{{ printNurse.contractGift.description }}</div>
+              <div v-if="printNurse?.contractGift?.price != null" class="gift-price">参考价值：¥{{ printNurse.contractGift.price }}</div>
             </div>
           </div>
         </div>
@@ -266,12 +335,6 @@
           </div>
         </div>
 
-        <!-- 底部 -->
-        <div class="resume-footer">
-          <div class="footer-line"></div>
-          <p>本简历由系统自动生成 ·
-            {{ new Date().toLocaleDateString('zh-CN') }}</p>
-        </div>
       </div>
     </div>
   </div>
@@ -432,12 +495,34 @@ getList();
 // 打印简历
 const printNurse = ref<MaternityNurse | null>(null);
 
+async function waitForImages(container: HTMLElement): Promise<void> {
+  const images = container.querySelectorAll('img');
+  const promises = Array.from(images).map((img) => {
+    return new Promise<void>((resolve) => {
+      if (img.complete && img.naturalHeight !== 0) {
+        resolve();
+      } else {
+        img.onload = () => resolve();
+        img.onerror = () => resolve();
+        // 超时处理，最多等待3秒
+        setTimeout(() => resolve(), 3000);
+      }
+    });
+  });
+  await Promise.all(promises);
+}
+
 async function handlePrintResume(record: MaternityNurse) {
   try {
     // 获取完整详情数据
     const res: any = await getNurse(record.nurseId!);
     printNurse.value = res.data || res;
     await nextTick();
+    // 等待所有图片加载完成
+    const printContainer = document.getElementById('nurse-resume-print');
+    if (printContainer) {
+      await waitForImages(printContainer);
+    }
     window.print();
   } catch {
     Message.error('获取简历数据失败');
@@ -516,6 +601,13 @@ async function handlePrintResume(record: MaternityNurse) {
 @media print {
 
   /* 隐藏页面上所有元素（visibility 允许后代覆盖） */
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
   body * {
     visibility: hidden !important;
   }
@@ -539,7 +631,7 @@ async function handlePrintResume(record: MaternityNurse) {
 
   @page {
     size: a4;
-    margin: 12mm 15mm;
+    margin: 8mm 10mm;
   }
 }
 
@@ -638,6 +730,49 @@ async function handlePrintResume(record: MaternityNurse) {
   font-size: 13px;
 }
 
+#nurse-resume-print .resume-summary-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+#nurse-resume-print .summary-tag {
+  padding: 4px 10px;
+  color: #165dff;
+  font-weight: 500;
+  font-size: 12px;
+  background: rgb(22 93 255 / 8%);
+  border: 1px solid rgb(22 93 255 / 14%);
+  border-radius: 999px;
+}
+
+#nurse-resume-print .resume-overview {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+#nurse-resume-print .overview-card {
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #f7f8fa, #eef3ff);
+  border: 1px solid #e5e6eb;
+  border-radius: 12px;
+}
+
+#nurse-resume-print .overview-label {
+  margin-bottom: 6px;
+  color: #86909c;
+  font-size: 12px;
+}
+
+#nurse-resume-print .overview-value {
+  color: #1d2129;
+  font-weight: 700;
+  font-size: 20px;
+}
+
 /* 信息网格 */
 #nurse-resume-print .resume-meta-grid {
   display: grid;
@@ -704,6 +839,32 @@ async function handlePrintResume(record: MaternityNurse) {
   font-size: 14px;
   line-height: 1.8;
   text-align: justify;
+}
+
+#nurse-resume-print .service-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+#nurse-resume-print .service-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  background: #f7f8fa;
+  border-radius: 10px;
+}
+
+#nurse-resume-print .service-item-label {
+  color: #86909c;
+  font-size: 12px;
+}
+
+#nurse-resume-print .service-item-value {
+  color: #1d2129;
+  font-weight: 600;
+  font-size: 14px;
 }
 
 /* 图片画廊 */
@@ -845,22 +1006,41 @@ async function handlePrintResume(record: MaternityNurse) {
   line-height: 1.6;
 }
 
-/* 底部 */
-#nurse-resume-print .resume-footer {
-  margin-top: 32px;
-  text-align: center;
+#nurse-resume-print .gift-card {
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #fff7e8, #fff);
+  border: 1px solid #ffe7ba;
+  border-radius: 12px;
 }
 
-#nurse-resume-print .footer-line {
-  height: 2px;
-  margin-bottom: 12px;
-  background: linear-gradient(90deg, transparent, #c9cdd4, transparent);
+#nurse-resume-print .gift-title {
+  margin-bottom: 6px;
+  color: #1d2129;
+  font-weight: 700;
+  font-size: 15px;
 }
 
-#nurse-resume-print .resume-footer p {
-  margin: 0;
-  color: #c9cdd4;
-  font-size: 11px;
-  letter-spacing: 1px;
+#nurse-resume-print .gift-desc,
+#nurse-resume-print .gift-price {
+  color: #4e5969;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+@media print {
+  #nurse-resume-print .resume-page {
+    max-width: none;
+  }
+
+  #nurse-resume-print .resume-section,
+  #nurse-resume-print .overview-card,
+  #nurse-resume-print .experience-block,
+  #nurse-resume-print .skill-card,
+  #nurse-resume-print .gift-card,
+  #nurse-resume-print .gallery-img,
+  #nurse-resume-print .gallery-img--cert {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
 }
 </style>
