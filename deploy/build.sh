@@ -9,6 +9,10 @@ set -e
 cd "$(dirname "$0")/.."
 
 IMAGE_NAME=registry.cn-shenzhen.aliyuncs.com/lnktech/aier-admin-ui
+
+# 自动递增 patch 版本号（清除 NODE_OPTIONS 避免 Debugger 消息）
+NODE_OPTIONS='' npm version patch --no-git-tag-version > /dev/null 2>&1
+
 VERSION=$(node -p "require('./package.json').version")
 IMAGE_TAG=${VERSION}
 

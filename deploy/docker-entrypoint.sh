@@ -9,8 +9,8 @@ NAMESERVERS=$(grep "nameserver" /etc/resolv.conf | awk '{print $2}' | tr '\n' ' 
 sed -i "s|__NAMESERVERS__|${NAMESERVERS}|g" "$CONF"
 
 # ---- 2. 动态注入 API 后端地址 ----
-# 默认后端地址，可通过 docker run -e API_BACKEND_URL=xxx 覆盖
-API_BACKEND_URL="${API_BACKEND_URL:-https://test.xiaodingdang1.com}"
+# 默认后端地址（生产环境），可通过 docker run -e API_BACKEND_URL=xxx 覆盖
+API_BACKEND_URL="${API_BACKEND_URL:-https://admin-api.xiaodingdang1.com}"
 sed -i "s|__API_BACKEND_URL__|${API_BACKEND_URL}|g" "$CONF"
 
 echo "========================================"
