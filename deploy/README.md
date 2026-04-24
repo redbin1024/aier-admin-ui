@@ -7,7 +7,8 @@ deploy/
 ├── Dockerfile              # 多阶段构建（node 构建 → nginx 运行）
 ├── nginx.conf              # Nginx 配置（gzip / SPA / API 反向代理）
 ├── docker-entrypoint.sh    # 启动脚本（动态注入 DNS + API 后端地址）
-├── build.sh                # 一键构建 & 推送脚本
+├── build.sh                # 一键构建 & 推送脚本（macOS / Linux）
+├── build.bat               # 一键构建 & 推送脚本（Windows）
 └── README.md               # 本文档
 ```
 
@@ -19,9 +20,17 @@ deploy/
 
 ### 1. 构建 & 推送
 
+**macOS / Linux：**
+
 ```bash
 # 在项目任意位置执行均可，脚本会自动切换到项目根目录
 ./deploy/build.sh
+```
+
+**Windows（命令提示符 / PowerShell）：**
+
+```bat
+deploy\build.bat
 ```
 
 脚本将自动：
@@ -47,6 +56,13 @@ docker run -d \
 
 ### 3. 更新部署
 
+#### 3.1 快捷部署
+```bash
+docker compose pull
+docker compose up -d
+```
+
+#### 3.2 手动部署
 ```bash
 docker pull registry.cn-shenzhen.aliyuncs.com/lnktech/aier-admin-ui:latest
 docker stop aier-admin-ui && docker rm aier-admin-ui
