@@ -89,6 +89,10 @@
             <template #icon><icon-plus /></template>
             新增客户
           </a-button>
+          <a-button type="primary" status="success" @click="handleImport">
+            <template #icon><icon-upload /></template>
+            客资导入
+          </a-button>
           <a-button type="primary" status="warning" @click="handleExport">
             <template #icon><icon-download /></template>
             导出
@@ -542,6 +546,10 @@
       notes: '',
     };
     dialogVisible.value = true;
+  };
+
+  const handleImport = () => {
+    router.push({ name: 'CrmCustomerImport' });
   };
 
   const submitCustomer = async () => {

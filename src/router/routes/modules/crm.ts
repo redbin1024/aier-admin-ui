@@ -25,6 +25,17 @@ const CRM: AppRouteRecordRaw = {
       },
     },
     {
+      path: 'customer/import',
+      name: 'CrmCustomerImport',
+      component: () => import('@/views/crm/customer/import.vue'),
+      meta: {
+        locale: '客资导入',
+        requiresAuth: true,
+        activeMenu: 'CrmCustomer',
+        roles: ['*'],
+      },
+    },
+    {
       path: 'seas',
       name: 'CrmSeas',
       component: () => import('@/views/crm/customer/seas.vue'),
